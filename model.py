@@ -71,7 +71,7 @@ __global__ void row_sum(const float* matrix, float* out, int rows, int cols) {
 # Step 6 - dot_product
 __device__ float dot_product(const float* a, const float* b, int n) {
     // return the dot product of a and b
-    if (!(threadIdx.x == 0 && blockIdx.x == 0)) return;
+    //if (!(threadIdx.x == 0 && blockIdx.x == 0)) return;
     float sum = 0;
     for (int i = 0; i < n; i++) {
         sum += a[i] * b[i];
@@ -102,8 +102,15 @@ __global__ void transpose(const float* in, float* out, int rows, int cols) {
     out[c*rows + r] = in[r*cols + c];
 }
 
-# Step 9 - qk_scores (not yet solved)
-# TODO: implement
+# Step 9 - qk_scores
+__global__ void qk_scores(const float* q, const float* k, float* scores, int seq_len, int head_dim) {
+    // compute scores[i, j] = dot(q_row_i, k_row_j) / sqrt(head_dim)
+    // seq_len=64 head_dim=32 block=(16,16) grid=(4,4)
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    if (!(i < seq_len && j < seq_len)) return;
+    scores[i*seq_len+j] = dot_product(q+i*head_dim, k+j*head_dim, head_dim) * rsqrtf((float)head_dim);
+}
 
 # Step 10 - softmax_rows (not yet solved)
 # TODO: implement
