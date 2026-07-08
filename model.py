@@ -8,6 +8,7 @@ import numpy as np
 
 # Step 1 - vector_add
 __global__ void vector_add(const float* a, const float* b, float* c, int n) {
+    // implement elementwise c[i] = a[i] + b[i]
     int i = blockIdx.x * blockDim.x + threadIdx.x;
     if (i < n) {
         c[i] = a[i] + b[i];
